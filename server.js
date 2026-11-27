@@ -12,14 +12,17 @@ const seed={v:2,seq:1000,orders:[],reviews:[],cats:CATS.map(c=>[c[0],c[1],c[2]])
 {id:6,name:'Wireless Lavalier Collar Mic',cat:2,price:2499,cost:1200,stock:35,e:'🎙️',h:230,desc:'Clean sound for videos and calls. Clips to your collar.',active:true,featured:true,images:['https://images.unsplash.com/photo-1590602847861-f357a9332bbc?auto=format&fit=crop&w=600&q=80','https://images.unsplash.com/photo-1520523839896-5aa4286f941c?auto=format&fit=crop&w=600&q=80']}]};
 const KV=process.env.KV_REST_API_URL||process.env.UPSTASH_REDIS_REST_URL,KT=process.env.KV_REST_API_TOKEN||process.env.UPSTASH_REDIS_REST_TOKEN;
 const kv=async c=>{const r=await fetch(KV,{method:'POST',headers:{Authorization:'Bearer '+KT},body:JSON.stringify(c)}),j=await r.json();if(j.error)throw new Error(j.error);return j.result};
-const clone=o=>JSON.parse(JSON.stringify(o)),noStore=()=>{throw new Error('Storage is not connected. Add the Upstash Redis integration in Vercel.')};
-const write=async d=>{if(KV){await kv(['SET','orvix_db',JSON.stringify(d)]);return}if(process.env.VERCEL)noStore();fs.mkdirSync(path.dirname(FILE),{recursive:true});fs.writeFileSync(FILE,JSON.stringify(d,null,2))};
-const read=async()=>{let d=null;
- if(KV){const v=await kv(['GET','orvix_db']);d=v?JSON.parse(v):null}else if(process.env.VERCEL)noStore();else{try{d=JSON.parse(fs.readFileSync(FILE,'utf8'))}catch(e){}}
+let memDb=null;
+const clone=o=>JSON.parse(JSON.stringify(o));
+const write=async d=>{memDb=clone(d);if(KV){try{await kv(['SET','orvix_db',JSON.stringify(d)]);return}catch(e){}}try{fs.mkdirSync(path.dirname(FILE),{recursive:true});fs.writeFileSync(FILE,JSON.stringify(d,null,2))}catch(e){}};
+const read=async()=>{let d=memDb;
+ if(KV){try{const v=await kv(['GET','orvix_db']);d=v?JSON.parse(v):null}catch(e){}}
+ if(!d){try{d=JSON.parse(fs.readFileSync(FILE,'utf8'))}catch(e){}}
  if(!d){d=clone(seed);await write(d);return d}
+ memDb=d;
  if(!d.v){d.v=2;d.settings={...seed.settings,...d.settings,freeOver:0};d.content=d.content||seed.content;d.reviews=d.reviews||[];d.products.forEach(p=>p.featured=true);
   for(const k of['easypaisa','jazzcash'])if(/X/.test(d.settings[k]))d.settings[k]=seed.settings[k]}
- if(!d.cats)d.cats=CATS.map(c=>[c[0],c[1],'']);d.products.forEach(p=>{p.images=p.images||[]});d.settings.email=d.settings.email||'';return d};
+ if(!d.cats)d.cats=CATS.map(c=>[c[0],c[1],c[2]]);d.products.forEach(p=>{p.images=p.images||[]});d.settings.email=d.settings.email||'';return d};
 /* ---- App ---- */
 const app=express(),store=path.join(__dirname,'public'),adm=path.join(__dirname,'public','admin');
 app.use(express.json({limit:'50kb'}));
@@ -87,6 +90,11 @@ app.use('/api/admin',A);
 /* ---- Hosts: admin.yourdomain.com serves the dashboard, everything else the store ---- */
 app.use((q,r,n)=>{if(/^admin\./i.test(q.hostname)&&!q.path.startsWith('/api'))return express.static(adm)(q,r,()=>r.sendFile(path.join(adm,'index.html')));n()});
 app.use('/admin',express.static(adm));
+app.get('/:page([a-zA-Z0-9_-]+)',(req,res,next)=>{
+  const file=path.join(store,req.params.page+'.html');
+  if(fs.existsSync(file))return res.sendFile(file);
+  next();
+});
 app.use(express.static(store));
 app.use((q,r)=>{if(q.path.startsWith('/api'))return bad(r,'Not found',404);r.status(404).sendFile(path.join(store,'404.html'))});
 app.use((e,q,r,n)=>{console.error(e);const c=e.status&&e.status<500?e.status:500;if(q.path.startsWith('/api'))return bad(r,c<500?'Invalid request.':'Something went wrong on our side. Please try again.',c);r.status(c).sendFile(path.join(store,'error.html'))});

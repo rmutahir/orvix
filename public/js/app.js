@@ -12,16 +12,17 @@ const pic=p=>{const m=p.images||[];return m.length?`<img class="i1" src="${esc(m
 function wlSync(){$("#wn").textContent=wl.length||""}
 function wlRender(){const l=S.products.filter(p=>wl.includes(p.id));$("#wlg").innerHTML=l.length?l.map(card).join(""):`<p class="empty">Nothing saved yet.<br>Tap the heart on any product to keep it here.</p>`;revealAll()}
 const P=i=>S&&S.products.find(p=>p.id==i);
-const pg=location.pathname.split("/").pop()||"index.html";
+const curPage=location.pathname.split("/").pop()||"index";
+const pg=curPage.replace(/\.html$/,"")||"index";
 const ic=(d,s=24)=>`<svg width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">${d}</svg>`;
-const L=[["index.html","Home",'<path d="M3 11l9-8 9 8v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/>'],["shop.html","Shop",'<path d="M5 8h14l-1 12H6zM9 8a3 3 0 016 0"/>'],["contact.html","Contact Us",'<path d="M4 5h16v11H9l-5 4z"/>']];
-const on=h=>h===pg?"on":"";
+const L=[["/","Home",'<path d="M3 11l9-8 9 8v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/>'],["shop","Shop",'<path d="M5 8h14l-1 12H6zM9 8a3 3 0 016 0"/>'],["contact","Contact Us",'<path d="M4 5h16v11H9l-5 4z"/>']];
+const on=h=>h==="/"?(pg===""||pg==="index"):(pg===h);
 document.body.insertAdjacentHTML("afterbegin",`<i class="pb" id="pb"></i><div class="ann" id="an" hidden></div>
-<header class="hd"><div class="wrap"><a class="logo" href="index.html">ORVIX</a>
+<header class="hd"><div class="wrap"><a class="logo" href="/">ORVIX</a>
 <nav class="nav">${L.map(l=>`<a class="${on(l[0])}" href="${l[0]}">${l[1]}</a>`).join("")}</nav>
-<div class="rt"><a class="cartbtn" href="wishlist.html" aria-label="Wishlist">${ic(HP)}<b id="wn"></b></a><button class="cartbtn" id="th" aria-label="Switch light or dark mode">${ic('<path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/>')}</button><button class="cartbtn" aria-label="Open cart" data-cart>${ic('<path d="M5 8h14l-1 12H6zM9 8a3 3 0 016 0"/>')}<b id="cn"></b></button></div></div></header>
+<div class="rt"><a class="cartbtn" href="wishlist" aria-label="Wishlist">${ic(HP)}<b id="wn"></b></a><button class="cartbtn" id="th" aria-label="Switch light or dark mode">${ic('<path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/>')}</button><button class="cartbtn" aria-label="Open cart" data-cart>${ic('<path d="M5 8h14l-1 12H6zM9 8a3 3 0 016 0"/>')}<b id="cn"></b></button></div></div></header>
 <nav class="tab" id="tb"><i class="hl"></i>${L.map(l=>`<a class="${on(l[0])}" href="${l[0]}">${ic(l[2],20)}${l[1]}</a>`).join("")}</nav>
-<div id="d"><div class="ov" data-close></div><aside class="dr" aria-label="Cart"><h3><span>Your cart</span><button data-close aria-label="Close">×</button></h3><div class="items" id="items"></div><div class="sum" id="sum"></div><a class="btn w" id="co" href="checkout.html">Checkout</a></aside></div>
+<div id="d"><div class="ov" data-close></div><aside class="dr" aria-label="Cart"><h3><span>Your cart</span><button data-close aria-label="Close">×</button></h3><div class="items" id="items"></div><div class="sum" id="sum"></div><a class="btn w" id="co" href="checkout">Checkout</a></aside></div>
 <div class="toast" id="ts"></div>`);
 document.body.insertAdjacentHTML("beforeend",`<div class="hlp" id="help"></div><footer class="ft" id="ft"></footer>`);
 (()=>{const hl=$("#tb .hl"),i=L.findIndex(l=>l[0]===pg),set=k=>hl.style.transform=`translateX(${k*100}%)`;let v=null;try{v=sessionStorage.getItem("ov_tab")}catch(e){}
@@ -53,14 +54,14 @@ function foot(){const s=S?S.settings:{},E=x=>/^https?:\/\//.test(x||""),ar="<i>�
  if(s.whatsapp)so.push(`<a href="https://wa.me/${esc(s.whatsapp)}" target="_blank" rel="noopener" aria-label="WhatsApp">${ic(SV.wa,18)}</a>`);
  $("#help").innerHTML=`<div class="wrap"><div class="hb2"><div class="hh"><span class="hi">${ic(SV.hs,26)}</span><div><h3>We're always here to help</h3><p>Real people, ready to answer your questions</p></div></div>
 <a class="hc" href="faq.html"><span class="ci">?</span><span><small>HELP CENTRE</small>FAQs &amp; answers</span>${ar}</a>
-${s.whatsapp?`<a class="hc" href="https://wa.me/${esc(s.whatsapp)}" target="_blank" rel="noopener"><span class="ci">${ic(SV.wa,20)}</span><span><small>WHATSAPP</small>Chat with us</span>${ar}</a>`:""}
+${s.whatsapp?`<a class="hc hc-wa" href="https://wa.me/${esc(s.whatsapp)}" target="_blank" rel="noopener"><span class="ci" style="background:#25D366;color:#fff">${ic(SV.wa,20)}</span><span><small style="color:#25D366;font-weight:700">WHATSAPP</small>Chat with us</span>${ar}</a>`:""}
 ${s.email?`<a class="hc" href="mailto:${esc(s.email)}"><span class="ci">${ic(SV.ml,20)}</span><span><small>EMAIL SUPPORT</small>${esc(s.email)}</span>${ar}</a>`:""}</div></div>`;
  $("#ft").innerHTML=`<div class="wrap"><div class="fg"><div><p>ORVIX. Beyond Everyday Essentials. Carefully chosen products, delivered across Pakistan.</p></div>
 <div><h4>Shop</h4><a href="shop.html">All products</a>${(S?S.cats:[]).map((c,i)=>`<a href="shop.html?cat=${i}">${esc(c[0])}</a>`).join("")}</div>
 <div><h4>Company</h4><a href="about.html">About us</a><a href="reviews.html">Reviews</a><a href="wishlist.html">Wishlist</a><a href="faq.html">FAQs</a><a href="contact.html">Contact us</a></div>
 <div><h4>Policies</h4><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms &amp; Conditions</a><a href="shipping.html">Shipping &amp; Payments</a><a href="returns.html">Returns &amp; Refunds</a></div></div>
 <div class="fbt"><div class="fl"><b class="logo">ORVIX</b>${so.length?'<span class="sep"></span>':""}<div class="soc">${so.join("")}</div></div>
-<div class="pay"><span class="sec">${ic(SV.lk,18)} Secure payments</span><span class="pm">Cash on Delivery</span><span class="pm" style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;background:#fff;border-radius:6px"><img src="/assets/aistudio/image_c9d9d226.png" alt="EasyPaisa" style="height:16px;object-fit:contain"></span><span class="pm" style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;background:#fff;border-radius:6px"><img src="/assets/aistudio/image_78d26bda.png" alt="JazzCash" style="height:16px;object-fit:contain"></span></div></div>
+<div class="pay"><span class="sec">${ic(SV.lk,18)} Secure payments</span><span class="pm">Cash on Delivery</span><span class="pm" style="display:inline-flex;align-items:center;justify-content:center;background:#fff;padding:3px 8px;border-radius:6px;height:26px"><img src="/assets/aistudio/image_c9d9d226.png" alt="EasyPaisa" style="height:18px;width:55px;object-fit:contain"></span><span class="pm" style="display:inline-flex;align-items:center;justify-content:center;background:#fff;padding:3px 8px;border-radius:6px;height:26px"><img src="/assets/aistudio/image_78d26bda.png" alt="JazzCash" style="height:18px;width:55px;object-fit:contain"></span></div></div>
 <div class="fb"><span>© ${new Date().getFullYear()} ORVIX. All rights reserved.</span><span>Beyond Everyday Essentials</span></div></div>`}
 const OFF=`<p class="empty">We could not load the store right now.<br>Please check your connection and <a class="lnk" href="#" onclick="location.reload();return false">try again</a>.</p>`;
 function shop(){const g=$("#grid"),c0=new URLSearchParams(location.search).get("cat");if(c0!==null)cat=c0;
