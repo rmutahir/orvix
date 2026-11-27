@@ -2,7 +2,9 @@
  "name": "orvix",
  "private": true,
  "scripts": {
-  "start": "node server.js"
+  "start": "node server.js",
+  "dev": "node server.js",
+  "build": "echo 'OK'"
  },
  "dependencies": {
   "express": "^4.22.3",

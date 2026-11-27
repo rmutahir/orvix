@@ -90,5 +90,5 @@ app.use('/admin',express.static(adm));
 app.use(express.static(store));
 app.use((q,r)=>{if(q.path.startsWith('/api'))return bad(r,'Not found',404);r.status(404).sendFile(path.join(store,'404.html'))});
 app.use((e,q,r,n)=>{console.error(e);const c=e.status&&e.status<500?e.status:500;if(q.path.startsWith('/api'))return bad(r,c<500?'Invalid request.':'Something went wrong on our side. Please try again.',c);r.status(c).sendFile(path.join(store,'error.html'))});
-if(require.main===module)app.listen(PORT,()=>console.log(`ORVIX store: http://localhost:${PORT}\nAdmin:       http://localhost:${PORT}/admin  (or admin.localhost:${PORT})`));
+if(require.main===module)app.listen(PORT,'0.0.0.0',()=>console.log(`ORVIX store: http://localhost:${PORT}\nAdmin:       http://localhost:${PORT}/admin  (or admin.localhost:${PORT})`));
 module.exports=app;

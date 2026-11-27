@@ -1,13 +1,8 @@
 {
- "outputDirectory": "public",
  "rewrites": [
   {
-   "source": "/api/:path*",
+   "source": "/(.*)",
    "destination": "/api/index.js"
-  },
-  {
-   "source": "/admin",
-   "destination": "/admin/index.html"
   }
  ]
 }
